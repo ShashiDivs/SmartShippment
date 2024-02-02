@@ -3,16 +3,30 @@ import pymongo
 import json
 from pymongo.mongo_client import MongoClient
 
-client = "mongodb+srv://shashingit:divyashashi@divya.wtvvnub.mongodb.net/?retryWrites=true&w=majority"
+uri = "mongodb+srv://shashingit:divyashashi@cluster0.g3ja9af.mongodb.net/?retryWrites=true&w=majority"
 DATA_FILE_PATH = (r"C:\Users\Admin\Desktop\train.csv")
 DATABASE = "Machine_Learning"
 COLLECTION_NAME = "DATASET"
 
+
 if __name__ == "__main__":
     df = pd.read_csv(DATA_FILE_PATH)
-    df.reset_index(drop=True,inplace=True)
-    json_record = list(json.loads(df.T.to_json()).values())
-    print(json_record[0])
+    print(f"Rows and Columns : {df.shape}")
 
-    client[DATABASE][COLLECTION_NAME].insert_many(json_record)
+    #convert the DataFrame to a list of dictionaries (json records)
+    json_records = json.loads(df.to_json(orient="records"))
+    print(json_records[0])
+
+    #Establish a connection to MongoDB
+    client = pymongo.MongoClient(uri)
+
+    #Access the desired database and collection
+    db = client[DATABASE]
+    collection = db[COLLECTION_NAME]
+
+    #Insert the JSON records into the collection
+    collection.insert_many(json_records)
+
+    #close the MongoDB connection
+    client.close()
     
